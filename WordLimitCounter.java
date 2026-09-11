@@ -1,7 +1,5 @@
 package basic;
 
-import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -13,11 +11,12 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
-import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 import org.apache.log4j.BasicConfigurator;
 
+import java.io.IOException;
 
-public class WordCount {
+
+public class WordLimitCounter {
 
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure();
@@ -36,7 +35,7 @@ public class WordCount {
 
         //class registries
         // main
-        j.setJarByClass(WordCount.class);
+        j.setJarByClass(WordLimitCounter.class);
         // mapper
         j.setMapperClass(MapForWordCount.class);
         // reduce
@@ -84,7 +83,9 @@ public class WordCount {
             for (IntWritable v:values){
                 sum += v.get();
             }
-            con.write(key, new IntWritable(sum));
+            if (sum >=3000) {
+                con.write(key, new IntWritable(sum));
+            }
         }
     }
 

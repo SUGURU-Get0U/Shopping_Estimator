@@ -1,7 +1,5 @@
 package basic;
 
-import java.io.IOException;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -13,11 +11,12 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
-import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 import org.apache.log4j.BasicConfigurator;
 
+import java.io.IOException;
 
-public class WordCount {
+
+public class WordFilter {
 
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure();
@@ -36,7 +35,7 @@ public class WordCount {
 
         //class registries
         // main
-        j.setJarByClass(WordCount.class);
+        j.setJarByClass(WordFilter.class);
         // mapper
         j.setMapperClass(MapForWordCount.class);
         // reduce
@@ -63,18 +62,20 @@ public class WordCount {
                 throws IOException, InterruptedException {
             String line = value.toString();
 
-            //output ex: (key,value) ---> (text,Int)
             String[] words = line.split(" ");
-            // words are being split by space or " "
+            //output ex: (key,value) ---> (text,Int)
 
-            for(String w: words){
-                Text tup_key = new Text(w); // converts the word (String) and transforms on Text\
-                IntWritable tup_value = new IntWritable(1);
+            for (String w: words) {
+                // add the word filter.
+                if (w.trim().equalsIgnoreCase("for")) {
+                    Text tup_key = new Text(w);
+                    IntWritable tup_value = new IntWritable(1);
+                    con.write(tup_key,tup_value); // "writes" the data on network, converts to bin
+                }
+            }
 
-                con.write(tup_key,tup_value); // "writes" the data on network, converts to bin
             }
         }
-    }
 
     public static class ReduceForWordCount extends Reducer<Text, IntWritable, Text, IntWritable> {
 
